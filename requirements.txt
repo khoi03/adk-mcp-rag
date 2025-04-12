@@ -1,0 +1,6 @@
+pypdf>=5.4.0
+requests==2.32.3
+google-adk>=0.0.1
+langchain>=0.3.15
+langchain-community>=0.3.20
+qdrant-client[fastembed-gpu]==1.13.3
