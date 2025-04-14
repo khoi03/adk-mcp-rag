@@ -23,6 +23,7 @@ class PromptLoader(BaseModel):
 
         return prompt_configs
 
-prompt_loader = PromptLoader(prompt_config_path="agents/config/prompts.yml")
-prompt_configs = prompt_loader._load_base_config()
-print("Prompt Configs:", prompt_configs['ask_rag_agent'])
+if __name__ == "__main__":
+    prompt_loader = PromptLoader(prompt_config_path="agents/config/prompts.yml")
+    prompt_configs = prompt_loader._load_base_config()
+    print("Prompt Configs:", prompt_configs['ask_rag_agent'])
