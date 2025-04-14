@@ -1,0 +1,14 @@
+services:
+  # Qdrant MCP service configuration
+  qdrant:
+    container_name: ${QDRANT_CONTAINER_NAME}
+    build:
+      context: .
+      dockerfile: Dockerfile.qdrant
+    ports:
+      - "${QDRANT_PORT:-8000}:8888"
+    env_file:
+      - .env
+    restart: unless-stopped
+    # networks:
+    #   - ${NETWORK_NAME}
