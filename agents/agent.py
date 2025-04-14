@@ -9,12 +9,12 @@ from google.adk.sessions import InMemorySessionService
 from google.adk.artifacts.in_memory_artifact_service import InMemoryArtifactService # Optional
 from google.adk.models.lite_llm import LiteLlm
 
-from tools import PromptLoader, MCPTools
+from .tools import PromptLoader, MCPTools
 from pydantic import BaseModel
 
 # Load environment variables from .env file in the parent directory
 # Place this near the top, before using env vars like API keys
-load_dotenv('../.env')
+load_dotenv('../docker/.env')
 # os.environ['OPENAI_API_KEY'] = "" # Set your OpenAI API key here
 
 class Agents():
@@ -25,10 +25,16 @@ class Agents():
     self.prompt_configs = self.prompt_loaders._load_base_config()
     self.mcp_tools = MCPTools()
 
+  async def get_tool_async(self):
+      """Creates an ADK Agent equipped with tools from the MCP Server."""
+      tools, exit_stack = await self.mcp_tools.get_tools_async("http://localhost:8888/sse")
+
+      return tools, exit_stack
+  
   # --- RAG Agent Definition ---
   async def get_rag_agent_async(self):
       """Creates an ADK Agent equipped with tools from the MCP Server."""
-      tools, exit_stack = await self.mcp_tools.get_tools_async("http://localhost:8000/sse")
+      tools, exit_stack = await self.mcp_tools.get_tools_async("http://localhost:8888/sse")
       print(f"Fetched {len(tools)} tools from MCP server.")
       
       root_agent = LlmAgent(
