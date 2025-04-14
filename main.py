@@ -5,6 +5,8 @@ from google.genai import types
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.adk.artifacts.in_memory_artifact_service import InMemoryArtifactService # Optional
+from google.adk.agents import LiveRequestQueue
+from google.adk.agents.run_config import RunConfig, StreamingMode
 
 from agents import Agents
 
@@ -33,16 +35,27 @@ async def async_main():
       artifact_service=artifacts_service, # Optional
       session_service=session_service,
   )
-
+  stream_mode = StreamingMode.SSE
   print("Running agent...")
   events_async = runner.run_async(
-      session_id=session.id, user_id=session.user_id, new_message=content
+      session_id=session.id, 
+      user_id=session.user_id, 
+      new_message=content,
+      run_config=RunConfig(streaming_mode=stream_mode),
   )
   
   async for event in events_async:
-    print("---------")
-    print(f"Event received: {event}")
-    print("---------")
+    if event.is_final_response():
+      print("\nFinal response received. Exiting loop.")
+      break
+
+    if event.content and event.content.parts:
+        if event.get_function_calls():
+            print("CALLING TOOL:", event.get_function_calls()[0].name)
+        elif event.get_function_responses():
+            print("GET TOOL RESPONSE SUCCESSFULLY")
+        elif event.content.parts[0].text:
+          print(event.content.parts[0].text, flush=True, end="")
 
   # Crucial Cleanup: Ensure the MCP server process connection is closed.
   print("Closing MCP server connection...")
