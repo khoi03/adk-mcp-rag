@@ -9,7 +9,7 @@ from google.adk.sessions import InMemorySessionService
 from google.adk.artifacts.in_memory_artifact_service import InMemoryArtifactService # Optional
 from google.adk.models.lite_llm import LiteLlm
 
-from .tools import PromptLoader, MCPTools
+from tools import PromptLoader, MCPTools
 from pydantic import BaseModel
 
 # Load environment variables from .env file in the parent directory
@@ -30,7 +30,6 @@ class Agents():
       """Creates an ADK Agent equipped with tools from the MCP Server."""
       tools, exit_stack = await self.mcp_tools.get_tools_async("http://localhost:8000/sse")
       print(f"Fetched {len(tools)} tools from MCP server.")
-      print(tools)
       
       root_agent = LlmAgent(
           model=LiteLlm(
@@ -47,3 +46,4 @@ class Agents():
       )
       return root_agent, exit_stack
   
+# root_agent, exit_stack = asyncio.run(Agents().get_rag_agent_async())
