@@ -14,7 +14,7 @@ from pydantic import BaseModel
 
 # Load environment variables from .env file in the parent directory
 # Place this near the top, before using env vars like API keys
-load_dotenv('../docker/.env')
+load_dotenv('./docker/.env', override=True)
 # os.environ['OPENAI_API_KEY'] = "" # Set your OpenAI API key here
 
 class Agents():
