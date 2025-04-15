@@ -1,9 +1,9 @@
 FROM python:3.12-slim
 
-ARG QDRANT_LOCAL_PATH \
-    QDRANT_PORT \
-    QDRANT_COLLECTION_NAME \
-    QDRANT_EMBEDDING_MODEL
+ARG QDRANT_URL
+ARG QDRANT_PORT
+ARG QDRANT_COLLECTION_NAME
+ARG QDRANT_EMBEDDING_MODEL
 
 WORKDIR /app
 
@@ -19,15 +19,14 @@ RUN apt-get update \
 && uv pip install --system --no-cache-dir mcp-server-qdrant
 
 # Expose the default port for SSE transport
-EXPOSE $QDRANT_PORT
-EXPOSE 8888
+EXPOSE ${QDRANT_PORT:-8000}
 
 # Set environment variables with defaults that can be overridden at runtime
-# ENV QDRANT_URL=""
-# ENV QDRANT_API_KEY=""
-ENV QDRANT_LOCAL_PATH=$QDRANT_LOCAL_PATH
-ENV COLLECTION_NAME=$QDRANT_COLLECTION_NAME
-ENV EMBEDDING_MODEL=$QDRANT_EMBEDDING_MODEL
+ENV QDRANT_URL=${QDRANT_URL}
+# Do not set QDRANT_LOCAL_PATH since we're using URL
+# ENV QDRANT_LOCAL_PATH=/app/qdrant/db
+ENV COLLECTION_NAME=${QDRANT_COLLECTION_NAME}
+ENV EMBEDDING_MODEL=${QDRANT_EMBEDDING_MODEL}
 
 # Run the server with SSE transport
 CMD ["uvx", "mcp-server-qdrant", "--transport", "sse"]

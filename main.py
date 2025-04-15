@@ -54,6 +54,7 @@ async def async_main():
             print("CALLING TOOL:", event.get_function_calls()[0].name)
         elif event.get_function_responses():
             print("GET TOOL RESPONSE SUCCESSFULLY")
+            print(event.get_function_responses())
         elif event.content.parts[0].text:
           print(event.content.parts[0].text, flush=True, end="")
 

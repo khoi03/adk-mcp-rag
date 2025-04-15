@@ -1,14 +1,49 @@
 services:
   # Qdrant MCP service configuration
-  qdrant:
+  qdrant-mcp:
     container_name: ${QDRANT_CONTAINER_NAME}
     build:
       context: .
       dockerfile: Dockerfile.qdrant
+      args:
+        - QDRANT_URL=${QDRANT_URL}
+        - QDRANT_PORT=${QDRANT_PORT}
+        - QDRANT_COLLECTION_NAME=${QDRANT_COLLECTION_NAME}
+        - QDRANT_EMBEDDING_MODEL=${QDRANT_EMBEDDING_MODEL}
     ports:
-      - "${QDRANT_PORT:-8000}:8888"
+      - "${QDRANT_PORT:-8888}:8000"
     env_file:
       - .env
     restart: unless-stopped
-    # networks:
-    #   - ${NETWORK_NAME}
+    networks:
+      - ${NETWORK_NAME}
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: always
+    container_name: qdrant
+    ports:
+      - 6333:6333
+      - 6334:6334
+    expose:
+      - 6333
+      - 6334
+      - 6335
+    configs:
+      - source: qdrant_config
+        target: /qdrant/config/production.yaml
+    volumes:
+      - ./qdrant_data:/qdrant/storage
+    env_file:
+      - .env
+    networks:
+      - ${NETWORK_NAME}
+
+configs:
+  qdrant_config:
+    content: |
+      log_level: INFO
+
+networks:
+  mcp-servers:
+    driver: bridge
