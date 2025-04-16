@@ -1,17 +1,14 @@
-import os
-
 import asyncio
 from google.genai import types
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.adk.artifacts.in_memory_artifact_service import InMemoryArtifactService # Optional
-from google.adk.agents import LiveRequestQueue
 from google.adk.agents.run_config import RunConfig, StreamingMode
 
 from agents import Agents
 
 agents = Agents()
-# --- Step 3: Main Execution Logic ---
+# --- Main Execution Logic ---
 async def async_main():
   session_service = InMemorySessionService()
   # Artifact service might not be needed for this example
@@ -21,9 +18,8 @@ async def async_main():
       state={}, app_name='mcp_filesystem_app', user_id='user_fs'
   )
 
-  # TODO: Change the query to be relevant to YOUR specified folder.
-  # e.g., "list files in the 'documents' subfolder" or "read the file 'notes.txt'"
-  query = "Use the tool and tell me who Tran Dinh Khoi is?"
+  # Change the query.
+  query = "Use the tool and tell me what you think about awards that Tran Dinh Khoi achieved?"
   print(f"User Query: '{query}'")
   content = types.Content(role='user', parts=[types.Part(text=query)])
 
@@ -54,7 +50,7 @@ async def async_main():
             print("CALLING TOOL:", event.get_function_calls()[0].name)
         elif event.get_function_responses():
             print("GET TOOL RESPONSE SUCCESSFULLY")
-            print(event.get_function_responses())
+            # print(event.get_function_responses())
         elif event.content.parts[0].text:
           print(event.content.parts[0].text, flush=True, end="")
 
