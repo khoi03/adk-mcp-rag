@@ -19,7 +19,7 @@ async def async_main():
   )
 
   # Change the query.
-  query = "Use the tool and tell me what you think about awards that Tran Dinh Khoi achieved?"
+  query = input("Enter your query: ")
   print(f"User Query: '{query}'")
   content = types.Content(role='user', parts=[types.Part(text=query)])
 
