@@ -6,7 +6,7 @@ from qdrant_client.http.models import Distance, VectorParams, SparseVectorParams
 
 # Initialize the vector store
 class VectorDB(BaseModel):
-    memory_location: str = "./qdrant"
+    memory_location: str = "localhost"
     embeddings_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
     sparse_embeddings_model_name: str = "Qdrant/bm25"
     collection_name: str = "demo_collection"
@@ -23,7 +23,7 @@ class VectorDB(BaseModel):
 
     def _initialize_client(self):
         # First, create the client
-        self.client = QdrantClient(path=self.memory_location)  # For production using url and port
+        self.client = QdrantClient(self.memory_location)  # For production using url and port
         
         # Set the models - this is needed for automatic collection creation to work
         self.client.set_model(self.embeddings_model_name)
