@@ -5,13 +5,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.qdrant
-      args:
-        - QDRANT_URL=${QDRANT_URL}
-        - QDRANT_PORT=${QDRANT_PORT}
-        - QDRANT_COLLECTION_NAME=${QDRANT_COLLECTION_NAME}
-        - QDRANT_EMBEDDING_MODEL=${QDRANT_EMBEDDING_MODEL}
     ports:
       - "${QDRANT_PORT:-8888}:8000"
+    expose:
+      - ${QDRANT_PORT:-8888}
     env_file:
       - .env
     restart: unless-stopped
