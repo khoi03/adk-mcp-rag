@@ -57,9 +57,15 @@ def add_to_vectorstore(db, chunks):
             new_chunks.append(chunk.page_content)
             new_chunk_ids.append(chunk.metadata["id"])
 
+    print("CHUNK IDS:", new_chunk_ids)
     if len(new_chunks):
-        print(f"Adding new documents: {len(new_chunks)}")
-        db.add_to_vectordb(new_chunks, source_ids=new_chunk_ids)
+        batch_size = 50
+        for i in range(0, len(new_chunks), batch_size):
+            batch_docs = new_chunks[i:i+batch_size]
+            batch_ids = new_chunk_ids[i:i+batch_size]
+            print(f"Adding batch {i//batch_size + 1} with {len(batch_docs)} documents")
+            db.add_to_vectordb(batch_docs, source_ids=batch_ids)
+        print(f"Successfully added all {len(new_chunks)} documents")
         # db.persist()
     else:
         print("No new documents to add")
@@ -94,14 +100,14 @@ def load_documents():
 def generate_data_store(db):
     documents = load_documents()
     chunks = split_text(documents)
-    print(chunks)
+    
     add_to_vectorstore(db, chunks)
 
 if __name__ == "__main__":
     # Create a new vector store
     vector_store = VectorDB(
         embeddings_model_name="sentence-transformers/all-MiniLM-L6-v2", 
-        memory_location="./qdrant/db", 
+        memory_location="localhost", 
         vector_size=384
     )
     generate_data_store(vector_store)

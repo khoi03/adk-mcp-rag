@@ -6,7 +6,7 @@ from qdrant_client.http.models import Distance, VectorParams, SparseVectorParams
 
 # Initialize the vector store
 class VectorDB(BaseModel):
-    memory_location: str = "./qdrant"
+    memory_location: str = "localhost"
     embeddings_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
     sparse_embeddings_model_name: str = "Qdrant/bm25"
     collection_name: str = "demo_collection"
@@ -22,16 +22,16 @@ class VectorDB(BaseModel):
         self._initialize_client()
 
     def _initialize_client(self):
+        """Initialize the Qdrant client and set up the collection"""
         # First, create the client
-        self.client = QdrantClient(path=self.memory_location)  # For production using url and port
+        self.client = QdrantClient(self.memory_location)  # For production using url and port
         
         # Set the models - this is needed for automatic collection creation to work
         self.client.set_model(self.embeddings_model_name)
         self.client.set_sparse_model(self.sparse_embeddings_model_name)
         
-        # No explicit collection creation - it will be created automatically on first add()
-
     def check_collection_existence(self):
+        """Check if the collection exists in the vector database"""
         try:
             collection_info = self.client.get_collection(collection_name=self.collection_name)
             return collection_info is not None
@@ -40,6 +40,7 @@ class VectorDB(BaseModel):
             return False
         
     def get_documents_from_collection(self):
+        """Retrieve documents from the collection of the vector database"""
         limit = 100  # Set a high number or determine count first
         offset = 0
         all_documents = []
@@ -90,6 +91,7 @@ class VectorDB(BaseModel):
             return []
     
     def add_to_vectordb(self, documents, source_ids):
+        """Add documents to the vector database"""
         try:
             if len(documents) == 0:
                 print("No documents to add")
@@ -111,6 +113,7 @@ class VectorDB(BaseModel):
             print(f"Error adding documents to vector database: {e}")
 
     def query(self, query_text: str, limit: int = 5, threshold: int = 0.5):
+        """Query from the vector database"""
         try:
             # Try the simplified query method first
             search_result = self.client.query(
