@@ -27,14 +27,14 @@ class Agents():
 
   async def get_tool_async(self):
       """Creates an ADK Agent equipped with tools from the MCP Server."""
-      tools, exit_stack = await self.mcp_tools.get_tools_async("http://localhost:8888/sse")
+      tools, exit_stack = await self.mcp_tools.get_tools_async(os.getenv('QRANT_MCP_SSE'))
 
       return tools, exit_stack
   
   # --- RAG Agent Definition ---
   async def get_rag_agent_async(self):
       """Creates an ADK Agent equipped with tools from the MCP Server."""
-      tools, exit_stack = await self.mcp_tools.get_tools_async("http://localhost:8888/sse")
+      tools, exit_stack = await self.mcp_tools.get_tools_async(os.getenv('QRANT_MCP_SSE'))
       print(f"Fetched {len(tools)} tools from MCP server.")
       
       root_agent = LlmAgent(
