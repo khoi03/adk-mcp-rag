@@ -10,10 +10,6 @@ A Retrieval-Augmented Generation (RAG) system that leverages Google's Agent Deve
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage](#usage)
-- [API Reference](#api-reference)
-- [Performance Optimization](#performance-optimization)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Overview
 
@@ -34,195 +30,139 @@ This project implements a Retrieval-Augmented Generation (RAG) system that combi
 
 ```bash
 # Clone the repository
-git clone https://github.com/khoi03/RAG-MCP-Google-ADK.git
-cd rag-agent
+git clone https://github.com/khoi03/adk-mcp-rag.git
+cd adk-mcp-rag
 
-# Create a virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Install uv if you don't have it already
+pip install uv
 
-# Install dependencies
-pip install -r requirements.txt
+# Create a virtual environment and install dependencies
+uv venv .venv --python=3.12
 
-# Set up environment variables
-cp .env.example .env
-# Edit .env with your API keys and configuration
+# Activate the virtual environment
+# For macOS/Linux
+source .venv/bin/activate
+# For Windows
+.venv\Scripts\activate
+
+# Install all required dependencies
+uv pip install -r requirements.txt
 ```
 
 ## Configuration
 
 ### Environment Variables
 
-Create a `.env` file with the following variables:
+Create a `.env` file in `docker` directory:
 
-```
-# Google ADK Configuration
-GOOGLE_ADK_API_KEY=your_api_key
-GOOGLE_ADK_PROJECT_ID=your_project_id
+```bash
+# Change directory into docker
+cd docker
 
-# MCP Server Configuration
-MCP_SERVER_HOST=your_mcp_host
-MCP_SERVER_PORT=your_mcp_port
-MCP_SERVER_API_KEY=your_mcp_api_key
-
-# Qdrant Configuration
-QDRANT_COLLECTION_NAME=your_collection_name
-QDRANT_VECTOR_SIZE=768  # Adjust based on your embedding model
-
-# RAG Configuration
-RETRIEVAL_TOP_K=5
-CONTEXT_WINDOW_SIZE=4096
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your API keys and configuration
 ```
 
-### Qdrant Collection Setup
+Example `.env` file:
+```bash
+# -------------------
+# Google API keys
+# -------------------
+GOOGLE_API_KEY=YOUR_VALUE_HERE
 
-```python
-from config import QdrantConfig
-from qdrant_client import QdrantClient
+# -------------------
+# OPENAI API keys
+# -------------------
+OPENAI_API_KEY=YOUR_VALUE_HERE
 
-def setup_qdrant_collection():
-    client = QdrantClient(
-        url=QdrantConfig.MCP_SERVER_HOST,
-        port=QdrantConfig.MCP_SERVER_PORT,
-        api_key=QdrantConfig.MCP_SERVER_API_KEY
-    )
-    
-    # Create collection if it doesn't exist
-    client.recreate_collection(
-        collection_name=QdrantConfig.COLLECTION_NAME,
-        vectors_config={
-            "embedding": {
-                "size": QdrantConfig.VECTOR_SIZE,
-                "distance": "Cosine"
-            }
-        }
-    )
-    
-    print(f"Collection {QdrantConfig.COLLECTION_NAME} created successfully")
+# -------------------
+# ANTHROPIC API keys
+# -------------------
+ANTHROPIC_API_KEY=YOUR_VALUE_HERE
 
-if __name__ == "__main__":
-    setup_qdrant_collection()
+# -------------------
+# Network names
+# -------------------
+NETWORK_NAME=mcp-servers
+
+# ----------------------------------
+# Parameters for Qdrant MCP Server 
+# ----------------------------------
+QDRANT_CONTAINER_NAME=qdrant-mcp
+QDRANT_URL=http://qdrant:6333
+QRANT_MCP_SSE=http://localhost:8888/sse
+# QDRANT_LOCAL_PATH=/qdrant/db
+# QDRANT_API_KEY=/qdrant/db
+QDRANT_PORT=8888
+QDRANT_COLLECTION_NAME=demo_collection
+QDRANT_EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+```
+
+### Build Qdrant and Qdrant MCP
+Build Qdrant and Qdrant MCP server using Docker Compose after completing the configuration steps:
+
+```bash
+# Build and start services
+docker compose up --build -d
+
+# Check running services
+docker compose ps
+
+# View logs
+docker compose logs -f
+
+# Stop and remove services
+docker compose down
 ```
 
 ## Usage
 
-### Basic Usage
-
-```python
-from rag_agent import RAGAgent
-
-# Initialize the agent
-agent = RAGAgent()
-
-# Query the agent
-response = agent.query("What is the capital of France?")
-print(response)
-```
-
 ### Document Ingestion
+Push all your needed files into the `data` directory and run:
 
-```python
-from rag_agent import DocumentProcessor
+```bash
+python local_vector_store/prepare_corpus_and_data_locally.py
+```
+Note: Currently only processes .md and .pdf files. The system will:
 
-processor = DocumentProcessor()
+1. Extract text from the documents
+2. Split the text into manageable chunks
+3. Generate embeddings for each chunk
+4. Store the embeddings in the Qdrant vector database
 
-# Process a single document
-processor.ingest_document("path/to/document.pdf")
+### Basic Usage
+To test and run the system with default settings:
 
-# Process a directory of documents
-processor.ingest_directory("path/to/documents/")
+```bash
+python main.py
 ```
 
-### Custom Retrieval Parameters
+### Built-in ADK-UI
+For tracing, testing, and debugging with a UI, run the built-in web interface provided by ADK:
 
-```python
-from rag_agent import RAGAgent
-
-agent = RAGAgent()
-
-# Customize retrieval parameters for a specific query
-response = agent.query(
-    "Explain quantum computing",
-    top_k=10,              # Retrieve more documents
-    reranking_enabled=True,  # Enable reranking of results
-    filter={"domain": "physics"}  # Filter by metadata
-)
-print(response)
+```bash
+adk web
 ```
 
-## API Reference
+## Project Structure
 
-### RAGAgent Class
-
-```python
-class RAGAgent:
-    """Main RAG agent class that coordinates retrieval and generation."""
-    
-    def __init__(self, config=None):
-        """Initialize the RAG agent with optional custom configuration."""
-        
-    def query(self, query_text, **kwargs):
-        """Process a query and return the augmented response."""
-        
-    def add_document(self, document, metadata=None):
-        """Add a document to the knowledge base."""
-        
-    def refresh_embeddings(self):
-        """Refresh document embeddings."""
+```bash
+adk-mcp-rag/
+├── assets/                  # Images and static files
+├── data/                    # Documents for ingestion
+├── docker/                  # Docker configurations
+│   ├── .env.example         # Example environment variables
+│   ├── Dockerfile.qdrant    # Docker file for qdrant mcp
+│   └── docker-compose.yml   # Docker Compose configuration
+├── agents/                  # Main code
+│   ├── config/prompts.yml   # Store prompts
+│   ├── tools/               # Embedding generation
+│       ├── mcp_tools.py     # Manage MCP Tools
+│       └── prompts.py       # Manage Prompts
+│   └── agent/               # Manage agents
+├── .gitignore               # Git ignore file
+├── main.py                  # Main entry point
+├── README.md                # This file
+└── requirements.txt         # Python dependencies
 ```
-
-### MCP Server Client
-
-```python
-class MCPQdrantClient:
-    """Client for interacting with Qdrant via MCP Server."""
-    
-    def __init__(self, host, port, api_key):
-        """Initialize the MCP Qdrant client."""
-        
-    def search(self, query_vector, top_k=5, filter=None):
-        """Search for similar vectors in Qdrant."""
-        
-    def add_vectors(self, vectors, payloads=None, ids=None):
-        """Add vectors to the Qdrant collection."""
-```
-
-## Performance Optimization
-
-### Embedding Caching
-
-The system implements an efficient caching mechanism for embeddings to avoid redundant computations:
-
-```python
-from functools import lru_cache
-
-@lru_cache(maxsize=1000)
-def get_embedding(text):
-    # Generate embedding
-    return embedding_model.encode(text)
-```
-
-### Batch Processing
-
-For efficient document ingestion:
-
-```python
-def batch_process_documents(documents, batch_size=10):
-    """Process documents in batches for efficiency."""
-    for i in range(0, len(documents), batch_size):
-        batch = documents[i:i+batch_size]
-        # Process batch
-        # ...
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
