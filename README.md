@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/khoi03-adk-mcp-rag-badge.png)](https://mseep.ai/app/khoi03-adk-mcp-rag)
+
 # RAG Agent with Google ADK and Qdrant MCP server
 
 A Retrieval-Augmented Generation (RAG) system that leverages Google's Agent Development Kit (ADK) and Qdrant vector database via MCP server.
