@@ -14,16 +14,15 @@ async def async_main():
   # Artifact service might not be needed for this example
   artifacts_service = InMemoryArtifactService()
 
-  session = session_service.create_session(
+  session = await session_service.create_session(
       state={}, app_name='mcp_filesystem_app', user_id='user_fs'
   )
-
   # Change the query.
   query = input("Enter your query: ")
   print(f"User Query: '{query}'")
   content = types.Content(role='user', parts=[types.Part(text=query)])
 
-  root_agent, exit_stack = await agents.get_rag_agent_async()
+  root_agent, toolset = await agents.get_rag_agent_async()
 
   runner = Runner(
       app_name='mcp_filesystem_app',
@@ -31,15 +30,15 @@ async def async_main():
       artifact_service=artifacts_service, # Optional
       session_service=session_service,
   )
-  stream_mode = StreamingMode.SSE
+  # stream_mode = StreamingMode.SSE
   print("Running agent...")
   events_async = runner.run_async(
       session_id=session.id, 
       user_id=session.user_id, 
       new_message=content,
-      run_config=RunConfig(streaming_mode=stream_mode),
+      # run_config=RunConfig(streaming_mode=stream_mode),
   )
-  
+  print(events_async)
   async for event in events_async:
     if event.is_final_response():
       print("\nFinal response received. Exiting loop.")
@@ -56,7 +55,7 @@ async def async_main():
 
   # Crucial Cleanup: Ensure the MCP server process connection is closed.
   print("Closing MCP server connection...")
-  await exit_stack.aclose()
+  await toolset.close()
   print("Cleanup complete.")
 
 if __name__ == '__main__':
