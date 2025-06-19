@@ -29,14 +29,14 @@ class MCPTools(BaseModel):
     async def get_tools_async(self, sse_url: str):
         """Gets tools from MCP Server asynchronously."""
         print("Attempting to connect to MCP server...")
-        tools, exit_stack = await MCPToolset.from_server(
+        toolset = MCPToolset(
             # Use SseServerParams for remote servers
             connection_params=SseServerParams(url=sse_url)
         )
         print("MCP Toolset created successfully.")
         # MCP requires maintaining a connection to the local MCP Server.
-        # exit_stack manages the cleanup of this connection.
-        return tools, exit_stack
+        # tool_set manages the cleanup of this connection.
+        return toolset
     
     def _mcp_thread_main(self, sse_url):
         """Main function for the MCP thread."""
