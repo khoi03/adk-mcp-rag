@@ -6,14 +6,22 @@ services:
       context: .
       dockerfile: Dockerfile.qdrant
     ports:
-      - "${QDRANT_PORT:-8888}:8000"
+      - "${FASTMCP_PORT:-8000}:${FASTMCP_PORT:-8000}"
     expose:
-      - ${QDRANT_PORT:-8888}
+      - ${FASTMCP_PORT:-8000}
     env_file:
       - .env
     restart: unless-stopped
+    depends_on:
+      - qdrant  # Ensure Qdrant starts before MCP server
     networks:
       - ${NETWORK_NAME}
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8000/sse"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 40s
 
   qdrant:
     image: qdrant/qdrant:latest
