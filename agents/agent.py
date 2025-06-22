@@ -37,14 +37,12 @@ class Agents():
     # --- RAG Agent Definition ---
     async def get_rag_agent_async(self):
         """Creates an ADK Agent equipped with tools from the MCP Server asynchronously."""
-        toolset = await self.mcp_tools.get_tools_async(os.getenv('QRANT_MCP_SSE'))
-        # print(f"Fetched {len(toolset)} tools from MCP server.")
-        print(toolset)
-        # print(toolset.get_tools())
+        toolset = await self.mcp_tools.get_tools_async(os.getenv('QRANT_MCP_SSE', 'http://localhost:8000/sse'))
         root_agent = LlmAgent(
-            model=LiteLlm(
-                model='gpt-4o-mini', 
-            ),
+            # model=LiteLlm(
+            #     model='gpt-4o-mini', 
+            # ),
+            model='gemini-2.0-flash',
             name='ask_rag_agent',
             instruction=self.prompt_configs['ask_rag_agent']['instruction_prompt'],
             tools=[
@@ -65,14 +63,14 @@ class Agents():
             return global_root_agent, global_toolset
             
         # Use the persistent thread approach to get tools
-        toolset = self.mcp_tools.get_tools(os.getenv('QRANT_MCP_SSE'))
-        # print(f"Fetched {len(toolset)} tools from MCP server.")
-        print(toolset)
+        toolset = self.mcp_tools.get_tools(os.getenv('QRANT_MCP_SSE', 'http://localhost:8000/sse'))
+        
         # Create the agent
         root_agent = LlmAgent(
-            model=LiteLlm(
-                model='gpt-4o-mini', 
-            ),
+            # model=LiteLlm(
+            #     model='gpt-4o-mini', 
+            # ),
+            model='gemini-2.0-flash',
             name='ask_rag_agent',
             instruction=self.prompt_configs['ask_rag_agent']['instruction_prompt'],
             tools=[
