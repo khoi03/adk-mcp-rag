@@ -30,13 +30,11 @@ This project implements a Retrieval-Augmented Generation (RAG) system that combi
 
 ## Installation
 
+Remember to install the [uv](https://docs.astral.sh/uv/getting-started/installation/) first
 ```bash
 # Clone the repository
 git clone https://github.com/khoi03/adk-mcp-rag.git
 cd adk-mcp-rag
-
-# Install uv if you don't have it already
-pip install uv
 
 # Create a virtual environment and install dependencies
 uv sync
