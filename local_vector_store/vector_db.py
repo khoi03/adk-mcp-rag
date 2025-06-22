@@ -9,7 +9,7 @@ class VectorDB(BaseModel):
     memory_location: str = "localhost"
     embeddings_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
     sparse_embeddings_model_name: str = "Qdrant/bm25"
-    collection_name: str = "demo_collection"
+    collection_name: str = "default_collection"
     vector_size: int = 384
     client: Optional[QdrantClient] = None
 
