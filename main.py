@@ -1,4 +1,5 @@
 import asyncio
+from colorama import Fore, Style
 from google.genai import types
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
@@ -19,7 +20,7 @@ async def async_main():
   )
   # Change the query.
   query = input("Enter your query: ")
-  print(f"User Query: '{query}'")
+  print(Fore.GREEN + f"User Query: '{query}'")
   content = types.Content(role='user', parts=[types.Part(text=query)])
 
   root_agent, toolset = await agents.get_rag_agent_async()
@@ -30,31 +31,31 @@ async def async_main():
       artifact_service=artifacts_service, # Optional
       session_service=session_service,
   )
-  # stream_mode = StreamingMode.SSE
+  stream_mode = StreamingMode.SSE
   print("Running agent...")
   events_async = runner.run_async(
       session_id=session.id, 
       user_id=session.user_id, 
       new_message=content,
-      # run_config=RunConfig(streaming_mode=stream_mode),
+      run_config=RunConfig(streaming_mode=stream_mode),
   )
-  print(events_async)
+  
   async for event in events_async:
     if event.is_final_response():
-      print("\nFinal response received. Exiting loop.")
+      print(Fore.RED + "\nFinal response received. Exiting loop.")
       break
 
     if event.content and event.content.parts:
         if event.get_function_calls():
-            print("CALLING TOOL:", event.get_function_calls()[0].name)
+            print(Fore.GREEN + "CALLING TOOL:", event.get_function_calls()[0].name)
         elif event.get_function_responses():
-            print("GET TOOL RESPONSE SUCCESSFULLY")
+            print(Fore.GREEN + "GET TOOL RESPONSE SUCCESSFULLY")
             # print(event.get_function_responses())
         elif event.content.parts[0].text:
-          print(event.content.parts[0].text, flush=True, end="")
+          print(Fore.BLUE + event.content.parts[0].text, flush=True, end="")
 
   # Crucial Cleanup: Ensure the MCP server process connection is closed.
-  print("Closing MCP server connection...")
+  print(Fore.YELLOW + "Closing MCP server connection...")
   await toolset.close()
   print("Cleanup complete.")
 
