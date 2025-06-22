@@ -1,4 +1,5 @@
 import asyncio
+from colorama import Fore, Style
 from google.genai import types
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
@@ -14,16 +15,15 @@ async def async_main():
   # Artifact service might not be needed for this example
   artifacts_service = InMemoryArtifactService()
 
-  session = session_service.create_session(
+  session = await session_service.create_session(
       state={}, app_name='mcp_filesystem_app', user_id='user_fs'
   )
-
   # Change the query.
   query = input("Enter your query: ")
-  print(f"User Query: '{query}'")
+  print(Fore.GREEN + f"User Query: '{query}'")
   content = types.Content(role='user', parts=[types.Part(text=query)])
 
-  root_agent, exit_stack = await agents.get_rag_agent_async()
+  root_agent, toolset = await agents.get_rag_agent_async()
 
   runner = Runner(
       app_name='mcp_filesystem_app',
@@ -42,21 +42,21 @@ async def async_main():
   
   async for event in events_async:
     if event.is_final_response():
-      print("\nFinal response received. Exiting loop.")
+      print(Fore.RED + "\nFinal response received. Exiting loop.")
       break
 
     if event.content and event.content.parts:
         if event.get_function_calls():
-            print("CALLING TOOL:", event.get_function_calls()[0].name)
+            print(Fore.GREEN + "CALLING TOOL:", event.get_function_calls()[0].name)
         elif event.get_function_responses():
-            print("GET TOOL RESPONSE SUCCESSFULLY")
+            print(Fore.GREEN + "GET TOOL RESPONSE SUCCESSFULLY")
             # print(event.get_function_responses())
         elif event.content.parts[0].text:
-          print(event.content.parts[0].text, flush=True, end="")
+          print(Fore.BLUE + event.content.parts[0].text, flush=True, end="")
 
   # Crucial Cleanup: Ensure the MCP server process connection is closed.
-  print("Closing MCP server connection...")
-  await exit_stack.aclose()
+  print(Fore.YELLOW + "Closing MCP server connection...")
+  await toolset.close()
   print("Cleanup complete.")
 
 if __name__ == '__main__':

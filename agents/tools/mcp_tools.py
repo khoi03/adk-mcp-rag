@@ -5,12 +5,9 @@ from concurrent.futures import ThreadPoolExecutor
 
 from dotenv import load_dotenv
 from google.genai import types
-from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, SseServerParams, StdioServerParameters
+from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, SseServerParams, SseConnectionParams
 
 from pydantic import BaseModel
-
-# Load environment variables from .env file in the parent directory
-load_dotenv('.env')
 
 # Global thread and loop for MCP tools
 _mcp_thread = None
@@ -29,15 +26,20 @@ class MCPTools(BaseModel):
     async def get_tools_async(self, sse_url: str):
         """Gets tools from MCP Server asynchronously."""
         print("Attempting to connect to MCP server...")
-        tools, exit_stack = await MCPToolset.from_server(
-            # Use SseServerParams for remote servers
-            connection_params=SseServerParams(url=sse_url)
-        )
-        print("MCP Toolset created successfully.")
-        # MCP requires maintaining a connection to the local MCP Server.
-        # exit_stack manages the cleanup of this connection.
-        return tools, exit_stack
-    
+        try:
+            toolset = MCPToolset(
+                # Use SseServerParams for remote servers
+                connection_params=SseConnectionParams(url=sse_url),
+                tool_filter=['qdrant-find']
+            )
+            print("MCP Toolset created successfully.")
+            # MCP requires maintaining a connection to the local MCP Server.
+            # tool_set manages the cleanup of this connection.
+            return toolset
+        except Exception as e:
+            print(f"Error connecting to MCP server: {e}")
+            raise e
+        
     def _mcp_thread_main(self, sse_url):
         """Main function for the MCP thread."""
         global _mcp_loop, _mcp_tools_result, _mcp_tools_error

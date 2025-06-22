@@ -82,8 +82,8 @@ def split_text(documents: list[Document]):
     print(f"Split {len(documents)} documents into {len(chunks)} chunks.")
 
     document = chunks[1]
-    print(document.page_content)
-    print(document.metadata)
+    # print(document.page_content)
+    # print(document.metadata)
 
     return chunks
 
@@ -94,7 +94,7 @@ def load_documents():
     documents = documents_loader.load()
     pdfs = pdf_loader.load()
     final_documents = documents + pdfs
-
+    print("PDF:\n", pdfs)
     return final_documents
 
 def generate_data_store(db):

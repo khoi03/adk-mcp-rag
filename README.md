@@ -39,7 +39,7 @@ cd adk-mcp-rag
 pip install uv
 
 # Create a virtual environment and install dependencies
-uv venv .venv --python=3.12
+uv sync
 
 # Activate the virtual environment
 # For macOS/Linux
@@ -47,8 +47,8 @@ source .venv/bin/activate
 # For Windows
 .venv\Scripts\activate
 
-# Install all required dependencies
-uv pip install -r requirements.txt
+# Add required dependencies via requirement file (In case there are new libs)
+uv add -r requirements.txt
 ```
 
 ## Configuration
@@ -95,10 +95,11 @@ QDRANT_CONTAINER_NAME=qdrant-mcp
 QDRANT_URL=http://qdrant:6333
 QRANT_MCP_SSE=http://localhost:8888/sse
 # QDRANT_LOCAL_PATH=/qdrant/db
-# QDRANT_API_KEY=/qdrant/db
-QDRANT_PORT=8888
-QDRANT_COLLECTION_NAME=demo_collection
+COLLECTION_NAME=default_collection
 QDRANT_EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+QDRANT_SEARCH_LIMIT=3
+FASTMCP_HOST=0.0.0.0
+FASTMCP_PORT=8888
 ```
 
 ### Build Qdrant and Qdrant MCP
@@ -106,7 +107,7 @@ Build Qdrant and Qdrant MCP server using Docker Compose after completing the con
 
 ```bash
 # Build and start services
-docker compose up --build -d
+docker compose -p qdrant-mcp up --build -d
 
 # Check running services
 docker compose ps
@@ -115,8 +116,10 @@ docker compose ps
 docker compose logs -f
 
 # Stop and remove services
-docker compose down
+docker compose -p qdrant-mcp down
 ```
+
+You can also access qdrant web UI at `http://localhost:6333/dashboard`
 
 ## Usage
 
